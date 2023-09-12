@@ -1,6 +1,5 @@
 package com.example.electroniclist
 
-import android.animation.ValueAnimator
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -11,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.adapter.CategoryListAdapter
+import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.retrofit.ServiceInterface
@@ -21,8 +21,8 @@ import com.example.electroniclist.viewmodel.ProductViewModel
 class ListCategoriesFragment : Fragment() {
     private lateinit var categoryAdapter: CategoryListAdapter
     private lateinit var productViewModel: ProductViewModel
-    private lateinit var repository: ProductRepository
     private lateinit var productDao: ProductDao
+    private lateinit var repository: ProductRepository
     private lateinit var serviceInterface: ServiceInterface
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,11 +30,18 @@ class ListCategoriesFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_list_categories, container, false)
     }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        val appDatabase = AppDatabase.getDatabase(requireContext())
+        productDao = appDatabase.productDao()
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        productViewModel = ViewModelProvider(requireActivity()).get(ProductViewModel::class.java)
-
+        val appDatabase = AppDatabase.getDatabase(requireContext())
+//        productViewModel = ViewModelProvider(requireActivity()).get(ProductViewModel::class.java)
+        repository = ProductRepository(productDao, appDatabase)
+        productViewModel = ProductViewModel(repository)
 //        repository = ProductRepository(productDao, serviceInterface)
 //        productViewModel = ViewModelProvider(this, ProductViewModelFactory(repository)).get(ProductViewModel::class.java)
 

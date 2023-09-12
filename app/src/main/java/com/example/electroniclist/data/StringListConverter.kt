@@ -6,7 +6,10 @@ import com.google.gson.reflect.TypeToken
 
 class StringListConverter {
     @TypeConverter
-    fun fromString(value: String): ArrayList<String> {
+    fun fromString(value: String?): ArrayList<String> {
+        if (value == null) {
+            return ArrayList()
+        }
         val listType = object : TypeToken<ArrayList<String>>() {}.type
         return Gson().fromJson(value, listType)
     }
