@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">ElectronicList</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="category_list">
+        <item>smartphones</item>
+        <item>laptops</item>
+        <item>fragrances</item>
+        <item>skincare</item>
+        <item>groceries</item>
+        <item>home-decoration</item>
+        <item>furniture</item>
+        <item>tops</item>
+        <item>womens-dresses</item>
+        <item>womens-shoes</item>
+        <item>mens-shirts</item>
+        <item>mens-shoes</item>
+        <item>mens-watches</item>
+        <item>womens-watches</item>
+        <item>womens-bags</item>
+        <item>womens-jewellery</item>
+        <item>sunglasses</item>
+        <item>automotive</item>
+        <item>motorcycle</item>
+        <item>lighting</item>
+    </string-array>
+</resources>
