@@ -4,23 +4,19 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.electroniclist.ProductCallback
 import com.example.electroniclist.data.ApiResponse
 import com.example.electroniclist.data.Products
 import com.example.electroniclist.data.asEntity
+import com.example.electroniclist.data.local.entities.ProductEntity
 import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.retrofit.ServiceBuilder
 import com.example.electroniclist.retrofit.ServiceInterface
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-//class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
-class ProductViewModel : ViewModel() {
+class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     private val _productDetail: MutableLiveData<Products> = MutableLiveData()
     val productDetail: LiveData<Products> = _productDetail
 
@@ -60,6 +56,8 @@ class ProductViewModel : ViewModel() {
                 try {
                     val responseBody = response.body()!!
                     val products = responseBody.products
+                    val productsList: List<ProductEntity> = products.asEntity()
+                    repository.insertAll(productsList)
                     _productsList.postValue(products)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -100,7 +98,7 @@ class ProductViewModel : ViewModel() {
                         _productAdded.postValue(true)
                     }
                 } else {
-                    Log.d("Api Failed","Error: ${response.code()}")
+                    Log.d("Api Failed", "Error: ${response.code()}")
                 }
             }
 
@@ -122,6 +120,7 @@ class ProductViewModel : ViewModel() {
                     callback.onApiFailure("Error processing response")
                 }
             }
+
             override fun onFailure(call: Call<Products>, t: Throwable) {
                 Log.e("Failed", "Api Failed" + t.message)
                 callback.onApiFailure("API call failed")
@@ -142,6 +141,7 @@ class ProductViewModel : ViewModel() {
                     e.printStackTrace()
                 }
             }
+
             override fun onFailure(call: Call<Products>, t: Throwable) {
                 Log.e("Failed", "Api Failed" + t.message)
             }
@@ -161,6 +161,7 @@ class ProductViewModel : ViewModel() {
                     e.printStackTrace()
                 }
             }
+
             override fun onFailure(call: Call<Products>, t: Throwable) {
                 Log.e("Failed", "Api Failed" + t.message)
             }
@@ -168,19 +169,7 @@ class ProductViewModel : ViewModel() {
         })
     }
 
-//    fun saveProductsToRoom(apiResponse: ApiResponse) {
-//        val productEntities = apiResponse.products.asEntity()
-//
-//        GlobalScope.launch(Dispatchers.IO) {
-//            repository.insertAll(productEntities)
-//        }
-//    }
-
-//    fun refreshData() {
-//        GlobalScope.launch(Dispatchers.IO) {
-//            repository.refreshData()
-//        }
-//    }
+    fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 }
 //class ProductViewModelFactory(private val repository: ProductRepository) : ViewModelProvider.Factory {
 //    override fun <T : ViewModel> create(modelClass: Class<T>): T {

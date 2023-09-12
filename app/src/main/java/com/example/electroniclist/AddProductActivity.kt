@@ -13,15 +13,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import com.example.electroniclist.data.Products
+import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.databinding.ActivityAddProductBinding
 import com.example.electroniclist.databinding.ActivityDetailProductBinding
 import com.example.electroniclist.retrofit.ServiceInterface
 import com.example.electroniclist.viewmodel.ProductViewModel
-import com.google.android.material.snackbar.Snackbar
 
 class AddProductActivity : AppCompatActivity(), ProductCallback {
     private lateinit var binding: ActivityAddProductBinding
@@ -36,7 +35,9 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
     private lateinit var serviceInterface: ServiceInterface
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_add_product)
+
+        val appDatabase = AppDatabase.getDatabase(this)
+        productDao = appDatabase.productDao()
 
         binding = ActivityAddProductBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -50,7 +51,9 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
         if (titleEdit == null) supportActionBar!!.title = title
         else supportActionBar!!.title = titleEdit
 
-        productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
+        repository = ProductRepository(productDao, appDatabase)
+        productViewModel = ProductViewModel(repository)
+//        productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
 //        repository = ProductRepository(productDao, serviceInterface)
 //        productViewModel = ViewModelProvider(this, ProductViewModelFactory(repository)).get(ProductViewModel::class.java)
 
@@ -164,7 +167,7 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
             description = inputDescripProduct,
             category = inputCategory,
         )
-//        productViewModel.addProduct(newProduct)
+
         val dialog = AlertDialog.Builder(this)
         val textView = TextView(this)
 

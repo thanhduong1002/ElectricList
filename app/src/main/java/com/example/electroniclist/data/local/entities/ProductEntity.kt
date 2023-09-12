@@ -3,6 +3,7 @@ package com.example.electroniclist.data.local.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.electroniclist.data.Products
 
 @Entity(tableName = "product")
 data class ProductEntity(
@@ -39,3 +40,21 @@ data class ProductEntity(
     @ColumnInfo(name = "images")
     val images: ArrayList<String>? = null,
 )
+
+fun List<ProductEntity>.asApiResponse(): List<Products>{
+    return map {
+        Products(
+            id = it.id,
+            title = it.title,
+            description = it.description,
+            price = it.price,
+            discountPercentage = it.discountPercentage,
+            rating = it.rating,
+            stock = it.stock,
+            brand = it.brand,
+            category = it.category,
+            thumbnail = it.thumbnail,
+            images = it.images
+        )
+    }
+}

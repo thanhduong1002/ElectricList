@@ -4,14 +4,19 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.electroniclist.data.Products
 import com.example.electroniclist.data.asEntity
+import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.local.entities.ProductEntity
 import com.example.electroniclist.retrofit.ServiceInterface
 import com.example.electroniclist.viewmodel.ProductViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class ProductRepository constructor(
-    private val productDao: ProductDao
+    private val productDao: ProductDao,
+    private val database: AppDatabase
 ) {
     fun getAllProducts(): List<ProductEntity> = productDao.getProducts()
 
@@ -21,20 +26,16 @@ class ProductRepository constructor(
     fun getDetailProduct(productId: Int): Flow<ProductEntity> =
         productDao.getDetailProduct(productId)
 
-    fun insertAll(products: List<ProductEntity>) = productDao.insertAll(products)
+    fun insertAll(products: List<ProductEntity>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.productDao().insertAll(products)
+        }
+    }
+
+    fun insertProduct(productEntity: ProductEntity) {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.productDao().insertProduct(productEntity)
+        }
+    }
 }
-//    suspend fun refreshData() {
-//        try {
-//            val response = retrofit.getAllProducts().execute()
-//            if (response.isSuccessful) {
-//                val responseBody = response.body()
-//                val products = responseBody?.products ?: emptyList()
-//                insertAll(products.asEntity())
-//            } else {
-//                Log.e("Failed", "Api Failed")
-//            }
-//        } catch (e: Exception) {
-//            Log.e("Failed", "Api Failed" + e.message)
-//        }
-//    }
 
