@@ -62,7 +62,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         productAdapter.setListener(this)
 
         repository = ProductRepository(productDao, appDatabase)
-        val productViewModel = ProductViewModel(repository)
+        productViewModel = ProductViewModel(repository)
 //        val productViewModel = ViewModelProvider(this, viewModelFactory).get(ProductViewModel::class.java)
 //        val productViewModel = ViewModelProvider(requireActivity()).get(ProductViewModel::class.java)
 //        repository = ProductRepository(productDao, serviceInterface)

@@ -43,6 +43,7 @@ class CategoryListAdapter(var categoryList: List<String>,
                 selectedItemPosition = -1
             } else {
                 productViewModel.selectCategory(item)
+                Log.d("item", "$item")
                 selectedItemPosition = position
                 Log.d("CategoryInCateAdapter", "${productViewModel.selectedCategory.value}")
             }
