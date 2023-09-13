@@ -43,6 +43,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
+        Log.d("itemPDVMD", "$category")
         if (category != "all") {
             getProductsByCategory(category)
         } else getAllProducts()
