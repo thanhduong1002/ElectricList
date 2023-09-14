@@ -37,5 +37,9 @@ class ProductRepository constructor(
             database.productDao().insertProduct(productEntity)
         }
     }
+
+    fun deleteAll() {
+        database.productDao().deleteAll()
+    }
 }
 

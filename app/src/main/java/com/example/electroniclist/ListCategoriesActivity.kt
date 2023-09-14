@@ -36,9 +36,7 @@ class ListCategoriesActivity : AppCompatActivity() {
         categoryRepository = CategoryRepository(categoryDao, appDatabase)
         productViewModel = ProductViewModel(repository)
         categoryViewModel = CategoryViewModel(categoryRepository)
-//        productViewModel = ViewModelProvider(this, ProductViewModelFactory(repository)).get(ProductViewModel::class.java)
-//        categoryViewModel = ViewModelProvider(this).get(CategoryViewModel::class.java)
-//        productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
+
         val recyclerViewHorizontal: RecyclerView = findViewById(R.id.recyclerViewCategories)
 
         val adapter = CategoryListAdapter(emptyList(), productViewModel)

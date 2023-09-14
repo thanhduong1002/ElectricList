@@ -1,5 +1,7 @@
 package com.example.electroniclist.viewmodel
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,12 +22,11 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     private val _productDetail: MutableLiveData<Products> = MutableLiveData()
     val productDetail: LiveData<Products> = _productDetail
 
-    private val _productsList: MutableLiveData<List<Products>> = MutableLiveData()
+    private val _productsList: MutableLiveData<List<Products>> = MutableLiveData(emptyList())
     val productsList: LiveData<List<Products>> = _productsList
 
     private val _selectedCategory = MutableLiveData<String>()
-    val selectedCategory: LiveData<String>
-        get() = _selectedCategory
+    val selectedCategory: LiveData<String> = _selectedCategory
 
     private val _productAdded: MutableLiveData<Boolean> = MutableLiveData()
     val productAdded: LiveData<Boolean> = _productAdded
@@ -42,11 +43,13 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     }
 
     fun selectCategory(category: String) {
-        _selectedCategory.value = category
         Log.d("itemPDVMD", "$category")
+        _selectedCategory.value = category
+        Log.d("itemPDVMD2", "${selectedCategory.value}")
         if (category != "all") {
             getProductsByCategory(category)
-        } else getAllProducts()
+        }
+        else getAllProducts()
     }
 
     private val retrofit = ServiceBuilder.buildService(ServiceInterface::class.java)
@@ -58,8 +61,11 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
                     val responseBody = response.body()!!
                     val products = responseBody.products
                     val productsList: List<ProductEntity> = products.asEntity()
+//                    deleteAllProducts()
                     repository.insertAll(productsList)
+                    Log.d("updatelivedata", "Before Update livedata list products ${productsList.size}")
                     _productsList.postValue(products)
+                    Log.d("updatelivedata", "Update livedata list products ${productsList.size}")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -70,6 +76,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             }
         })
     }
+
 
     fun getProductsByCategory(category: String) {
         retrofit.getProductsByCategory(category).enqueue(object : Callback<ApiResponse> {
@@ -170,7 +177,36 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
         })
     }
 
+    fun deleteAllProducts() = repository.deleteAll()
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
+
+    fun isDatabaseEmpty(): Boolean {
+        return repository.getAllProducts().isEmpty()
+    }
+
+    fun saveExitTime(context: Context) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppExitTime", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        val currentTimeMillis = System.currentTimeMillis()
+        editor.putLong("ExitTime", currentTimeMillis)
+        editor.apply()
+    }
+
+    fun checkReopenTime(context: Context): Boolean {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppExitTime", Context.MODE_PRIVATE)
+        val exitTime = sharedPreferences.getLong("ExitTime", 0)
+        val currentTimeMillis = System.currentTimeMillis()
+        val elapsedMinutes = (currentTimeMillis - exitTime) / (1000 * 60)
+        return elapsedMinutes >= 2
+    }
+
+    private val _reopenEvent = MutableLiveData<Boolean>()
+    val reopenEvent: LiveData<Boolean>
+        get() = _reopenEvent
+
+    fun setReopenEvent(value: Boolean) {
+        _reopenEvent.value = value
+    }
 }
 //class ProductViewModelFactory(private val repository: ProductRepository) : ViewModelProvider.Factory {
 //    override fun <T : ViewModel> create(modelClass: Class<T>): T {
