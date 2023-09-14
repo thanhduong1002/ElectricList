@@ -40,9 +40,11 @@ class CategoryListAdapter(var categoryList: List<String>,
         holder.btnCategory.setOnClickListener {
             if (position == selectedItemPosition) {
                 productViewModel.selectCategory("all")
+//                productViewModel._selectedCategory.value = "all"
                 selectedItemPosition = -1
             } else {
                 productViewModel.selectCategory(item)
+//                productViewModel._selectedCategory.value = item
                 Log.d("item", "$item")
                 selectedItemPosition = position
                 Log.d("CategoryInCateAdapter", "${productViewModel.selectedCategory.value}")
