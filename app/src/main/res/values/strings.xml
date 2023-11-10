@@ -25,4 +25,13 @@
         <item>lighting</item>
     </string-array>
     <string name="all">all</string>
+    <string name="price">Price:</string>
+    <string name="name_product">Name Product:</string>
+    <string name="rating">Rating:</string>
+    <string name="description_product">Description Product:</string>
+    <string name="category">Category:</string>
+    <string name="add_product">Add Product</string>
+    <string name="image_of_product">Image of product</string>
+    <string name="floating_action_button_to_add_a_new_product">floating Action Button to add a new product</string>
+    <string name="colored_selector">Colored Selector</string>
 </resources>

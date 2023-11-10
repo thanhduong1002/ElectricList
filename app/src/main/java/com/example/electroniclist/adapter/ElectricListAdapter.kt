@@ -51,6 +51,7 @@ class ElectricListAdapter(private var electricList: List<Products>) :
         return electricList.size
     }
 
+    @Suppress("NAME_SHADOWING")
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ElectricListHolder, position: Int) {
         val item = electricList[position]
