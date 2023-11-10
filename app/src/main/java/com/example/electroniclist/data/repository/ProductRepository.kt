@@ -1,14 +1,8 @@
 package com.example.electroniclist.data.repository
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import com.example.electroniclist.data.Products
-import com.example.electroniclist.data.asEntity
 import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.local.entities.ProductEntity
-import com.example.electroniclist.retrofit.ServiceInterface
-import com.example.electroniclist.viewmodel.ProductViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.electroniclist.data.local.entities.CategoryEntity
-import com.example.electroniclist.data.local.entities.ProductEntity
 import com.example.electroniclist.data.local.entities.asCategoryEntities
 import com.example.electroniclist.data.repository.CategoryRepository
 import com.example.electroniclist.retrofit.ServiceBuilder
@@ -18,11 +17,13 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
 
     fun fetchCategories() {
         val retrofit = ServiceBuilder.buildService(ServiceInterface::class.java)
+
         retrofit.getAllCategories().enqueue(object : Callback<List<String>> {
             override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
                 if (response.isSuccessful) {
                     val categories = response.body()
-                    (categories?.asCategoryEntities() ?: null)?.let { insertAllCategories(it) }
+
+                    categories?.asCategoryEntities()?.let { insertAllCategories(it) }
                     categoryList.postValue(categories)
                 }
             }

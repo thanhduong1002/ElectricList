@@ -24,4 +24,5 @@
         <item>motorcycle</item>
         <item>lighting</item>
     </string-array>
+    <string name="all">all</string>
 </resources>

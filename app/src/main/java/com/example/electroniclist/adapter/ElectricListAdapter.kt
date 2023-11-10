@@ -1,9 +1,9 @@
 package com.example.electroniclist.adapter
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Typeface
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -12,17 +12,15 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.AddProductActivity
 import com.example.electroniclist.DetailProductActivity
 import com.example.electroniclist.ProductAdapterListener
 import com.example.electroniclist.R
 import com.example.electroniclist.data.Products
-import com.example.electroniclist.viewmodel.ProductViewModel
 import com.squareup.picasso.Picasso
 
-class ElectricListAdapter(var electricList: List<Products>) :
+class ElectricListAdapter(private var electricList: List<Products>) :
     RecyclerView.Adapter<ElectricListAdapter.ElectricListHolder>() {
 
     private var listener: ProductAdapterListener? = null
@@ -53,26 +51,27 @@ class ElectricListAdapter(var electricList: List<Products>) :
         return electricList.size
     }
 
+    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ElectricListHolder, position: Int) {
         val item = electricList[position]
 
-        holder.nameItem.text = item?.title.toString()
-        holder.priceItem.text = "$" + item?.price.toString()
-        Picasso.get().load(item?.images?.get(0)).into(holder.imageItem)
+        holder.nameItem.text = item.title.toString()
+        holder.priceItem.text = "$${item.price}"
+        Picasso.get().load(item.images?.get(0)).into(holder.imageItem)
 
         holder.item.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, DetailProductActivity::class.java)
-            intent.putExtra(DetailProductActivity.ProductId, item?.id.toString())
-            intent.putExtra(DetailProductActivity.TitleProduct, item?.title)
+            intent.putExtra(DetailProductActivity.ProductId, item.id.toString())
+            intent.putExtra(DetailProductActivity.TitleProduct, item.title)
             context.startActivity(intent)
         }
 
         holder.editItem.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, AddProductActivity::class.java)
-            intent.putExtra(AddProductActivity.titleEdit, item?.title)
-            intent.putExtra(AddProductActivity.ProductId, item?.id.toString())
+            intent.putExtra(AddProductActivity.titleEdit, item.title)
+            intent.putExtra(AddProductActivity.ProductId, item.id.toString())
             context.startActivity(intent)
         }
 
@@ -88,13 +87,13 @@ class ElectricListAdapter(var electricList: List<Products>) :
             }
 
             dialog.setMessage("Are you sure you want to delete this product?")
-            dialog.setPositiveButton("Yes") { dialog, which ->
-                listener?.onDeleteProduct(item?.id.toString())
+            dialog.setPositiveButton("Yes") { dialog, _ ->
+                listener?.onDeleteProduct(item.id.toString())
                 notifyDataSetChanged()
                 dialog.dismiss()
             }
 
-            dialog.setNegativeButton("No") { dialog, which ->
+            dialog.setNegativeButton("No") { dialog, _ ->
                 dialog.dismiss()
             }
 

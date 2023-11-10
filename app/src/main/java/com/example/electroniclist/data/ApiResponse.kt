@@ -1,10 +1,9 @@
 package com.example.electroniclist.data
 
-import androidx.lifecycle.LiveData
 import com.example.electroniclist.data.local.entities.ProductEntity
 import com.google.gson.annotations.SerializedName
 
-final data class ApiResponse (
+data class ApiResponse (
 
     @SerializedName("products" ) var products : ArrayList<Products> = arrayListOf(),
     @SerializedName("total"    ) var total    : Int?                = null,
