@@ -12,7 +12,7 @@
         android:id="@+id/textViewName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name Product:"
+        android:text="@string/name_product"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,13 +24,14 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewName" />
+        app:layout_constraintTop_toBottomOf="@id/textViewName"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
     <TextView
         android:id="@+id/textViewPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Price:"
+        android:text="@string/price"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,13 +43,14 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewPrice" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewPrice"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
     <TextView
         android:id="@+id/textViewRating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rating:"
+        android:text="@string/rating"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,13 +62,14 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewRating" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewRating"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
     <TextView
         android:id="@+id/textViewDescrip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Description Product:"
+        android:text="@string/description_product"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -78,13 +81,14 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDescrip" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewDescrip"
+        tools:ignore="Autofill,LabelFor,TextFields" />
 
     <TextView
         android:id="@+id/textViewCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Category:"
+        android:text="@string/category"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,7 +111,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner"
-        android:text="Add Product"
+        android:text="@string/add_product"
         android:layout_marginTop="@dimen/space_20dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

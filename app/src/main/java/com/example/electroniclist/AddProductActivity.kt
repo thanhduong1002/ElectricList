@@ -112,6 +112,7 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
         }
     }
 
+    @Suppress("NAME_SHADOWING")
     @SuppressLint("SetTextI18n")
     override fun onApiFailure(errorMessage: String) {
         val dialog = AlertDialog.Builder(this)
@@ -129,6 +130,7 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
         dialog.show()
     }
 
+    @Suppress("NAME_SHADOWING")
     @SuppressLint("SetTextI18n")
     private fun onClickAddButton(productId: String?) {
         val inputNameProduct = binding.editName.text.toString()

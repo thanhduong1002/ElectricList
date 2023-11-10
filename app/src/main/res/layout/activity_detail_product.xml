@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/imageProduct"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/image_of_product" />
 
     <TextView
         android:id="@+id/productId"

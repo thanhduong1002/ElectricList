@@ -2,7 +2,6 @@ package com.example.electroniclist.adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,14 +38,12 @@ class CategoryListAdapter(
 
         holder.btnCategory.text = item
         holder.btnCategory.setOnClickListener {
-            if (position == selectedItemPosition) {
+            selectedItemPosition = if (position == selectedItemPosition) {
                 productViewModel.selectCategory("all")
-                selectedItemPosition = -1
+                -1
             } else {
                 productViewModel.selectCategory(item)
-                Log.d("item", item)
-                selectedItemPosition = position
-                Log.d("CategoryInCateAdapter", "${productViewModel.selectedCategory.value}")
+                position
             }
 
             notifyDataSetChanged()

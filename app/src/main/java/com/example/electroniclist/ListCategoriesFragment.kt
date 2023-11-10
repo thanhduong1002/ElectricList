@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.electroniclist.adapter.CategoryListAdapter
 import com.example.electroniclist.data.local.AppDatabase
@@ -20,6 +21,7 @@ import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.databinding.FragmentListCategoriesBinding
 import com.example.electroniclist.viewmodel.CategoryViewModel
 import com.example.electroniclist.viewmodel.ProductViewModel
+import com.example.electroniclist.viewmodel.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +38,7 @@ class ListCategoriesFragment : Fragment() {
     private lateinit var categoryRepository: CategoryRepository
     private var isDataLoaded = false
     private lateinit var binding: FragmentListCategoriesBinding
+    private lateinit var sharedViewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,17 +54,16 @@ class ListCategoriesFragment : Fragment() {
 
         productDao = appDatabase.productDao()
         categoryDao = appDatabase.categoryDao()
+        productRepository = ProductRepository(productDao, appDatabase)
+//        productViewModel = ProductViewModel(productRepository)
+        categoryRepository = CategoryRepository(categoryDao, appDatabase)
+        categoryViewModel = CategoryViewModel(categoryRepository)
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+        productViewModel = sharedViewModel.productViewModel.value ?: throw IllegalArgumentException("ProductViewModel not set.")
     }
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val appDatabase = AppDatabase.getDatabase(requireContext())
-
-        productRepository = ProductRepository(productDao, appDatabase)
-        productViewModel = ProductViewModel(productRepository)
-        categoryRepository = CategoryRepository(categoryDao, appDatabase)
-        categoryViewModel = CategoryViewModel(categoryRepository)
 
         categoryAdapter = CategoryListAdapter(emptyList(), productViewModel)
         binding.recyclerViewCategories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)

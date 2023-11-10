@@ -1,7 +1,5 @@
 package com.example.electroniclist.viewmodel
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -50,10 +48,6 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             getProductsByCategory(category)
         }
         else getAllProducts()
-    }
-    init {
-
-
     }
 
     private val retrofit = ServiceBuilder.buildService(ServiceInterface::class.java)
@@ -189,7 +183,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     fun deleteAllProducts() = repository.deleteAll()
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 
-    val _reopenEvent = MutableLiveData<Boolean>(true)
+    val _reopenEvent = MutableLiveData(true)
     val reopenEvent: LiveData<Boolean>
         get() = _reopenEvent
 

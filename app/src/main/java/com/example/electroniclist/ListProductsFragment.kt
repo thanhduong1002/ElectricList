@@ -9,16 +9,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.adapter.ElectricListAdapter
-import com.example.electroniclist.data.local.AppDatabase
-import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.local.entities.asApiResponse
-import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.databinding.FragmentListProductsBinding
 import com.example.electroniclist.viewmodel.ProductViewModel
+import com.example.electroniclist.viewmodel.SharedViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,11 +25,10 @@ import kotlinx.coroutines.withContext
 
 class ListProductsFragment : Fragment(), ProductAdapterListener {
     private lateinit var productAdapter: ElectricListAdapter
-    private lateinit var repository: ProductRepository
-    private lateinit var productDao: ProductDao
     private lateinit var productViewModel: ProductViewModel
     private var isDataLoaded = false
     private lateinit var binding: FragmentListProductsBinding
+    private lateinit var sharedViewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,12 +41,11 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val appDatabase = AppDatabase.getDatabase(requireContext())
-        productDao = appDatabase.productDao()
-        repository = ProductRepository(productDao, appDatabase)
-        productViewModel = ProductViewModel(repository)
+        sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+        productViewModel= sharedViewModel.productViewModel.value ?: throw IllegalArgumentException("ProductViewModel not set.")
     }
 
+    @DelicateCoroutinesApi
     @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,13 +65,11 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             productViewModel.selectedCategory.observe(
                 viewLifecycleOwner
             ) { selectedCategory ->
-                Log.d("SelectedCategory", "Selected Category changed: $selectedCategory")
                 productViewModel.getProductsByCategory(selectedCategory)
             }
         }
 
-        productViewModel.productAdded.observe(viewLifecycleOwner) { added ->
-            Log.d("Test", "$added")
+        productViewModel.productAdded.observe(viewLifecycleOwner) { _ ->
             productViewModel.setFalseProductAdded()
         }
 
@@ -110,8 +105,6 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
     private fun refreshData() {
         Log.d("isDataLoaded", "$isDataLoaded")
         if (!isDataLoaded) {
-            Log.d("reopen", "Load lai")
-
             val connectivityManager =
                 context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             val networkInfo = connectivityManager?.activeNetworkInfo
