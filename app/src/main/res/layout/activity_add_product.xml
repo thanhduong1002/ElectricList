@@ -5,7 +5,7 @@
     android:id="@+id/add_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="15dp"
+    android:padding="@dimen/space_15dp"
     tools:context=".AddProductActivity">
 
     <TextView
@@ -97,17 +97,17 @@
         android:layout_alignParentTop="true"
         app:layout_constraintTop_toBottomOf="@+id/textViewCategory"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="10dp" />
+        android:layout_margin="@dimen/space_10dp" />
 
     <Button
         android:id="@+id/buttonAdd"
-        android:layout_width="409dp"
+        android:layout_width="@dimen/space_409dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner"
         android:text="Add Product"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="@dimen/space_20dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

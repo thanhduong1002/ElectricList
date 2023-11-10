@@ -1,5 +1,6 @@
 package com.example.electroniclist
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -8,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.adapter.ElectricListAdapter
@@ -16,6 +16,7 @@ import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.local.entities.asApiResponse
 import com.example.electroniclist.data.repository.ProductRepository
+import com.example.electroniclist.databinding.FragmentListProductsBinding
 import com.example.electroniclist.viewmodel.ProductViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,11 +30,14 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
     private lateinit var productDao: ProductDao
     private lateinit var productViewModel: ProductViewModel
     private var isDataLoaded = false
+    private lateinit var binding: FragmentListProductsBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_list_products, container, false)
+    ): View {
+        binding = FragmentListProductsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,53 +45,53 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
 
         val appDatabase = AppDatabase.getDatabase(requireContext())
         productDao = appDatabase.productDao()
+        repository = ProductRepository(productDao, appDatabase)
+        productViewModel = ProductViewModel(repository)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val appDatabase = AppDatabase.getDatabase(requireContext())
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerViewProducts)
         productAdapter = ElectricListAdapter(emptyList())
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = productAdapter
+        binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewProducts.adapter = productAdapter
 
         productAdapter.setListener(this)
 
-        repository = ProductRepository(productDao, appDatabase)
-        productViewModel = ProductViewModel(repository)
-
-        productViewModel.productsList.observe(viewLifecycleOwner, Observer { products ->
+        productViewModel.productsList.observe(viewLifecycleOwner) { products ->
             productAdapter.setProductsList(products)
             productAdapter.notifyDataSetChanged()
-        })
+        }
 
         GlobalScope.launch(Dispatchers.Main) {
             productViewModel.selectedCategory.observe(
-                viewLifecycleOwner,
-                Observer { selectedCategory ->
-                    Log.d("SelectedCategory", "Selected Category changed: $selectedCategory")
-                    productViewModel.getProductsByCategory(selectedCategory)
-                })
+                viewLifecycleOwner
+            ) { selectedCategory ->
+                Log.d("SelectedCategory", "Selected Category changed: $selectedCategory")
+                productViewModel.getProductsByCategory(selectedCategory)
+            }
         }
 
-        productViewModel.productAdded.observe(viewLifecycleOwner, Observer { added ->
+        productViewModel.productAdded.observe(viewLifecycleOwner) { added ->
             Log.d("Test", "$added")
             productViewModel.setFalseProductAdded()
-//            }
-        })
+        }
 
-        productViewModel.productDeleted.observe(viewLifecycleOwner, Observer { productDeleted ->
+        productViewModel.productDeleted.observe(viewLifecycleOwner) { productDeleted ->
             if (productDeleted) {
                 productViewModel.setFalseProductDeleted()
             }
-        })
+        }
 
-        productViewModel.reopenEvent.observe(viewLifecycleOwner, Observer { reopen ->
+        productViewModel._reopenEvent.observe(viewLifecycleOwner) { reopen ->
+            Log.d("reopen", "onViewCreated: $reopen")
             if (reopen) {
                 refreshData()
             }
-        })
+        }
+
+
         refreshData()
     }
 
@@ -102,9 +106,12 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
 //        productViewModel.deleteProduct(productId)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun refreshData() {
+        Log.d("isDataLoaded", "$isDataLoaded")
         if (!isDataLoaded) {
             Log.d("reopen", "Load lai")
+
             val connectivityManager =
                 context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             val networkInfo = connectivityManager?.activeNetworkInfo
@@ -115,12 +122,14 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             } else {
                 CoroutineScope(Dispatchers.IO).launch {
                     val listProductEntity = productViewModel.getAllProductsFromDB()
+
                     withContext(Dispatchers.Main) {
                         productAdapter.setProductsList(listProductEntity.asApiResponse())
                         productAdapter.notifyDataSetChanged()
                     }
                 }
             }
+
             isDataLoaded = true
         }
     }

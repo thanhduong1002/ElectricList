@@ -43,13 +43,17 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     }
 
     fun selectCategory(category: String) {
-        Log.d("itemPDVMD", "$category")
+        Log.d("itemPDVMD", category)
         _selectedCategory.value = category
         Log.d("itemPDVMD2", "${selectedCategory.value}")
         if (category != "all") {
             getProductsByCategory(category)
         }
         else getAllProducts()
+    }
+    init {
+
+
     }
 
     private val retrofit = ServiceBuilder.buildService(ServiceInterface::class.java)
@@ -61,11 +65,11 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
                     val responseBody = response.body()!!
                     val products = responseBody.products
                     val productsList: List<ProductEntity> = products.asEntity()
-//                    deleteAllProducts()
+
                     repository.insertAll(productsList)
-                    Log.d("updatelivedata", "Before Update livedata list products ${productsList.size}")
+                    Log.d("updateLiveData", "Before Update livedata list products ${productsList.size}")
                     _productsList.postValue(products)
-                    Log.d("updatelivedata", "Update livedata list products ${productsList.size}")
+                    Log.d("updateLiveData", "Update livedata list products ${productsList.size}")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -84,6 +88,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
                 try {
                     val responseBody = response.body()!!
                     val products = responseBody.products
+
                     _productsList.postValue(products)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -101,6 +106,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             override fun onResponse(call: Call<Products>, response: Response<Products>) {
                 if (response.isSuccessful) {
                     val responseBody = response.body()
+
                     if (responseBody != null) {
                         Log.d("Api successful", "$responseBody")
                         _productAdded.postValue(true)
@@ -122,6 +128,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             override fun onResponse(call: Call<Products>, response: Response<Products>) {
                 try {
                     val product: Products? = response.body()
+
                     callback.onProductReceived(product)
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
@@ -142,6 +149,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             override fun onResponse(call: Call<Products>, response: Response<Products>) {
                 try {
                     val product: Products? = response.body()
+
                     if (product != null) {
                         Log.d("Api successful", "$product")
                     }
@@ -162,6 +170,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             override fun onResponse(call: Call<Products>, response: Response<Products>) {
                 try {
                     val product: Products? = response.body()
+
                     if (product != null) {
                         Log.d("Api successful", "$product")
                     }
@@ -180,27 +189,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     fun deleteAllProducts() = repository.deleteAll()
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 
-    fun isDatabaseEmpty(): Boolean {
-        return repository.getAllProducts().isEmpty()
-    }
-
-    fun saveExitTime(context: Context) {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppExitTime", Context.MODE_PRIVATE)
-        val editor: SharedPreferences.Editor = sharedPreferences.edit()
-        val currentTimeMillis = System.currentTimeMillis()
-        editor.putLong("ExitTime", currentTimeMillis)
-        editor.apply()
-    }
-
-    fun checkReopenTime(context: Context): Boolean {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppExitTime", Context.MODE_PRIVATE)
-        val exitTime = sharedPreferences.getLong("ExitTime", 0)
-        val currentTimeMillis = System.currentTimeMillis()
-        val elapsedMinutes = (currentTimeMillis - exitTime) / (1000 * 60)
-        return elapsedMinutes >= 2
-    }
-
-    private val _reopenEvent = MutableLiveData<Boolean>()
+    val _reopenEvent = MutableLiveData<Boolean>(true)
     val reopenEvent: LiveData<Boolean>
         get() = _reopenEvent
 
@@ -208,12 +197,3 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
         _reopenEvent.value = value
     }
 }
-//class ProductViewModelFactory(private val repository: ProductRepository) : ViewModelProvider.Factory {
-//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//        if (modelClass.isAssignableFrom(ProductViewModel::class.java)) {
-//            @Suppress("UNCHECKED_CAST")
-//            return ProductViewModel(repository) as T
-//        }
-//        throw IllegalArgumentException("Unknown ViewModel class")
-//    }
-//}

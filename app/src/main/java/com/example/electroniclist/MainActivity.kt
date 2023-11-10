@@ -3,11 +3,7 @@ package com.example.electroniclist
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.adapter.ElectricListAdapter
 import com.example.electroniclist.data.ApiResponse
 import com.example.electroniclist.data.Products
@@ -21,9 +17,10 @@ import retrofit2.Response
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     var data = ArrayList<Products>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_main)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -40,7 +37,7 @@ class MainActivity : AppCompatActivity() {
                     val responseBody = response.body()!!
                     data = responseBody.products
 
-                    var adapter = ElectricListAdapter(data)
+                    val adapter = ElectricListAdapter(data)
                     binding.recyclerView.adapter = adapter
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
