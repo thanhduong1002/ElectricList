@@ -79,15 +79,13 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             }
         }
 
-        productViewModel._reopenEvent.observe(viewLifecycleOwner) { reopen ->
-            Log.d("reopen", "onViewCreated: $reopen")
+        productViewModel.reopenEvent.observe(viewLifecycleOwner) { reopen ->
             if (reopen) {
                 refreshData()
             }
         }
 
-
-        refreshData()
+        firstLoad()
     }
 
     override fun onDeleteProduct(productId: String) {
@@ -101,29 +99,38 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
 //        productViewModel.deleteProduct(productId)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun refreshData() {
-        Log.d("isDataLoaded", "$isDataLoaded")
+    private fun firstLoad() {
+        Log.d("firstLoad", "firstLoad: ")
         if (!isDataLoaded) {
-            val connectivityManager =
-                context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            val networkInfo = connectivityManager?.activeNetworkInfo
-            val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
-
-            if (hasWifi) {
-                productViewModel.getAllProducts()
-            } else {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val listProductEntity = productViewModel.getAllProductsFromDB()
-
-                    withContext(Dispatchers.Main) {
-                        productAdapter.setProductsList(listProductEntity.asApiResponse())
-                        productAdapter.notifyDataSetChanged()
-                    }
-                }
-            }
+            checkAndLoadData()
 
             isDataLoaded = true
+        }
+    }
+
+    private fun refreshData() {
+        Log.d("refreshData", "refreshData: ")
+        checkAndLoadData()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun checkAndLoadData() {
+        val connectivityManager =
+            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val networkInfo = connectivityManager?.activeNetworkInfo
+        val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
+
+        if (hasWifi) {
+            productViewModel.getAllProducts()
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                val listProductEntity = productViewModel.getAllProductsFromDB()
+
+                withContext(Dispatchers.Main) {
+                    productAdapter.setProductsList(listProductEntity.asApiResponse())
+                    productAdapter.notifyDataSetChanged()
+                }
+            }
         }
     }
 }

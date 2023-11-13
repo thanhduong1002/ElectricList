@@ -183,7 +183,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     fun deleteAllProducts() = repository.deleteAll()
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 
-    val _reopenEvent = MutableLiveData(true)
+    private val _reopenEvent = MutableLiveData<Boolean>()
     val reopenEvent: LiveData<Boolean>
         get() = _reopenEvent
 

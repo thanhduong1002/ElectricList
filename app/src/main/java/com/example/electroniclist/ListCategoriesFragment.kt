@@ -14,10 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.electroniclist.adapter.CategoryListAdapter
 import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.CategoryDao
-import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.local.entities.asCategoryList
 import com.example.electroniclist.data.repository.CategoryRepository
-import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.databinding.FragmentListCategoriesBinding
 import com.example.electroniclist.viewmodel.CategoryViewModel
 import com.example.electroniclist.viewmodel.ProductViewModel
@@ -32,9 +30,7 @@ class ListCategoriesFragment : Fragment() {
     private lateinit var categoryAdapter: CategoryListAdapter
     private lateinit var productViewModel: ProductViewModel
     private lateinit var categoryViewModel: CategoryViewModel
-    private lateinit var productDao: ProductDao
     private lateinit var categoryDao: CategoryDao
-    private lateinit var productRepository: ProductRepository
     private lateinit var categoryRepository: CategoryRepository
     private var isDataLoaded = false
     private lateinit var binding: FragmentListCategoriesBinding
@@ -52,10 +48,7 @@ class ListCategoriesFragment : Fragment() {
 
         val appDatabase = AppDatabase.getDatabase(requireContext())
 
-        productDao = appDatabase.productDao()
         categoryDao = appDatabase.categoryDao()
-        productRepository = ProductRepository(productDao, appDatabase)
-//        productViewModel = ProductViewModel(productRepository)
         categoryRepository = CategoryRepository(categoryDao, appDatabase)
         categoryViewModel = CategoryViewModel(categoryRepository)
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
@@ -75,38 +68,45 @@ class ListCategoriesFragment : Fragment() {
         }
 
         productViewModel.reopenEvent.observe(viewLifecycleOwner) { reopen ->
-            Log.d("reopen", "reload data")
-
             if (reopen) {
                 refreshData()
             }
         }
-        refreshData()
+        firstLoad()
+    }
+
+    private fun firstLoad() {
+        if (!isDataLoaded) {
+            Log.d("firstLoadCate", "Load lan 1")
+            checkAndLoadData()
+
+            isDataLoaded = true
+        }
+    }
+
+    private fun refreshData() {
+        Log.d("refreshDataCate", "Load lai")
+        checkAndLoadData()
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun refreshData() {
-        if (!isDataLoaded) {
-            Log.d("reopenCate", "Load lai")
+    private fun checkAndLoadData() {
+        val connectivityManager =
+            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val networkInfo = connectivityManager?.activeNetworkInfo
+        val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
 
-            val connectivityManager =
-                context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-            val networkInfo = connectivityManager?.activeNetworkInfo
-            val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
+        if (hasWifi) {
+            categoryViewModel.fetchCategories()
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                val listCategoryEntity = categoryViewModel.getAllCategoriesFromDB()
 
-            if (hasWifi) {
-                categoryViewModel.fetchCategories()
-            } else {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val listCategoryEntity = categoryViewModel.getAllCategoriesFromDB()
-
-                    withContext(Dispatchers.Main) {
-                        categoryAdapter.categoryList = listCategoryEntity.asCategoryList()
-                        categoryAdapter.notifyDataSetChanged()
-                    }
+                withContext(Dispatchers.Main) {
+                    categoryAdapter.categoryList = listCategoryEntity.asCategoryList()
+                    categoryAdapter.notifyDataSetChanged()
                 }
             }
-            isDataLoaded = true
         }
     }
 }

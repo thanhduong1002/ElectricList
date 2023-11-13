@@ -48,7 +48,7 @@ class HomeActivity : AppCompatActivity() {
             this.startActivity(intent)
         }
 
-        productViewModel._reopenEvent.observe(this) { reopen ->
+        productViewModel.reopenEvent.observe(this) { reopen ->
             Log.d("reopen", "onViewCreated: $reopen")
         }
     }
@@ -65,7 +65,7 @@ class HomeActivity : AppCompatActivity() {
 
         if (appInBackground) {
             val elapsedTime = System.currentTimeMillis() - appPausedTime
-            if (elapsedTime > (5 * 1000)) {
+            if (elapsedTime > (2 * 60 * 1000)) {
                 Log.d("reopen", "da qua 2 minutes")
                 productViewModel.setReopenEvent(true)
             }
