@@ -64,4 +64,6 @@ dependencies {
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
+
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

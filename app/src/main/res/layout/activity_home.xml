@@ -6,7 +6,7 @@
     <FrameLayout
         android:id="@+id/fragmentContainer1"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/space_80dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

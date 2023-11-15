@@ -4,47 +4,50 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Typeface
+import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.AddProductActivity
-import com.example.electroniclist.DetailProductActivity
+import com.example.electroniclist.DetailProductFragment
 import com.example.electroniclist.ProductAdapterListener
 import com.example.electroniclist.R
 import com.example.electroniclist.data.Products
+import com.example.electroniclist.databinding.ElectricItemBinding
 import com.squareup.picasso.Picasso
 
 class ElectricListAdapter(private var electricList: List<Products>) :
     RecyclerView.Adapter<ElectricListAdapter.ElectricListHolder>() {
 
     private var listener: ProductAdapterListener? = null
-
-    fun setListener(listener: ProductAdapterListener) {
+    private var fragmentActivity: FragmentActivity? = null
+    fun setListener(listener: ProductAdapterListener, fragmentActivity: FragmentActivity) {
         this.listener = listener
+        this.fragmentActivity = fragmentActivity
     }
+
     fun setProductsList(electricList: List<Products>) {
         this.electricList = electricList
     }
 
-    class ElectricListHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val nameItem: TextView = view.findViewById(R.id.textViewName)
-        val priceItem: TextView = view.findViewById(R.id.textViewPrice)
-        val imageItem: ImageView = view.findViewById(R.id.imageItem)
-        val item: ConstraintLayout = view.findViewById(R.id.item)
-        val editItem: ImageButton = view.findViewById(R.id.editButton)
-        val deleteItem: ImageButton = view.findViewById(R.id.deleteButton)
-    }
+    class ElectricListHolder(val electricItemBinding: ElectricItemBinding) :
+        RecyclerView.ViewHolder(electricItemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ElectricListHolder {
-        val adapterLayout = LayoutInflater.from(parent.context)
-            .inflate(R.layout.electric_item, parent, false)
-        return ElectricListHolder(adapterLayout)
+        return ElectricListHolder(
+            ElectricItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
     override fun getItemCount(): Int {
@@ -56,27 +59,43 @@ class ElectricListAdapter(private var electricList: List<Products>) :
     override fun onBindViewHolder(holder: ElectricListHolder, position: Int) {
         val item = electricList[position]
 
-        holder.nameItem.text = item.title.toString()
-        holder.priceItem.text = "$${item.price}"
-        Picasso.get().load(item.images?.get(0)).into(holder.imageItem)
+        holder.electricItemBinding.textViewName.text = item.title.toString()
+        holder.electricItemBinding.textViewPrice.text = "$${item.price}"
+        Picasso.get().load(item.images?.get(0)).into(holder.electricItemBinding.imageItem)
 
-        holder.item.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, DetailProductActivity::class.java)
-            intent.putExtra(DetailProductActivity.ProductId, item.id.toString())
-            intent.putExtra(DetailProductActivity.TitleProduct, item.title)
-            context.startActivity(intent)
+        holder.electricItemBinding.item.setOnClickListener {
+            fragmentActivity?.let { activity ->
+                val fragmentManager: FragmentManager = activity.supportFragmentManager
+                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+
+                val detailProductFragment = DetailProductFragment()
+
+                val args = Bundle()
+                args.putString(DetailProductFragment.ProductId, item.id.toString())
+                args.putString(DetailProductFragment.TitleProduct, item.title)
+                detailProductFragment.arguments = args
+
+                val fragmentContainer1 = activity.findViewById<FrameLayout>(R.id.fragmentContainer1)
+
+                fragmentContainer1.visibility = View.INVISIBLE
+                fragmentTransaction.replace(R.id.fragmentContainer2, detailProductFragment)
+                fragmentTransaction.addToBackStack(null)
+
+                fragmentTransaction.commit()
+            }
         }
 
-        holder.editItem.setOnClickListener {
+        holder.electricItemBinding.editButton.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, AddProductActivity::class.java)
+
             intent.putExtra(AddProductActivity.titleEdit, item.title)
             intent.putExtra(AddProductActivity.ProductId, item.id.toString())
+
             context.startActivity(intent)
         }
 
-        holder.deleteItem.setOnClickListener {
+        holder.electricItemBinding.deleteButton.setOnClickListener {
             val dialog = AlertDialog.Builder(holder.itemView.context)
             val textView = TextView(holder.itemView.context)
 

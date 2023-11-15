@@ -3,11 +3,9 @@ package com.example.electroniclist.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
-import com.example.electroniclist.R
+import com.example.electroniclist.databinding.CategoryItemBinding
 import com.example.electroniclist.viewmodel.ProductViewModel
 
 class CategoryListAdapter(
@@ -20,14 +18,17 @@ class CategoryListAdapter(
         parent: ViewGroup,
         viewType: Int
     ): CategoryListViewHolder {
-        val adapterLayout = LayoutInflater.from(parent.context)
-            .inflate(R.layout.category_item, parent, false)
-        return CategoryListViewHolder(adapterLayout)
+        return CategoryListViewHolder(
+            CategoryItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
-    class CategoryListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val btnCategory: Button = view.findViewById(R.id.categoryButton)
-    }
+    class CategoryListViewHolder(val categoryItemBinding: CategoryItemBinding) :
+        RecyclerView.ViewHolder(categoryItemBinding.root)
 
     @SuppressLint("RecyclerView", "NotifyDataSetChanged")
     override fun onBindViewHolder(
@@ -36,8 +37,8 @@ class CategoryListAdapter(
     ) {
         val item = categoryList[position]
 
-        holder.btnCategory.text = item
-        holder.btnCategory.setOnClickListener {
+        holder.categoryItemBinding.categoryButton.text = item
+        holder.categoryItemBinding.categoryButton.setOnClickListener {
             selectedItemPosition = if (position == selectedItemPosition) {
                 productViewModel.selectCategory("all")
                 -1
@@ -50,9 +51,9 @@ class CategoryListAdapter(
         }
 
         if (position == selectedItemPosition) {
-            holder.btnCategory.setBackgroundColor(Color.BLUE)
+            holder.categoryItemBinding.categoryButton.setBackgroundColor(Color.BLUE)
         } else {
-            holder.btnCategory.setBackgroundColor(Color.parseColor("#70A7D8"))
+            holder.categoryItemBinding.categoryButton.setBackgroundColor(Color.parseColor("#70A7D8"))
         }
     }
 

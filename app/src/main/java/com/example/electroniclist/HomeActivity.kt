@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.example.electroniclist.data.local.AppDatabase
 import com.example.electroniclist.data.local.dao.ProductDao
@@ -71,5 +72,12 @@ class HomeActivity : AppCompatActivity() {
             }
         }
         appInBackground = false
+
+        binding.fragmentContainer1.visibility = View.VISIBLE
+        setActionBarTitle(getString(R.string.app_name))
+    }
+
+    fun setActionBarTitle(title: String?) {
+        supportActionBar?.title = title
     }
 }
