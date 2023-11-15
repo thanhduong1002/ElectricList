@@ -10,6 +10,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ServiceInterface {
     @Headers("Content-Type:application/json")
@@ -33,4 +34,7 @@ interface ServiceInterface {
 
     @DELETE("/products/{id}")
     fun deleteProduct(@Path("id") id: Int): Call<Products>
+
+    @GET("/products")
+    fun getProductsByPaging(@Query("limit") limit: Int, @Query("skip") skip: Int?): Call<ApiResponse>
 }

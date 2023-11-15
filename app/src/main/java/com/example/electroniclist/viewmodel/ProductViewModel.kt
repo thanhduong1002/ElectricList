@@ -17,9 +17,6 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ProductViewModel(val repository: ProductRepository) : ViewModel() {
-    private val _productDetail: MutableLiveData<Products> = MutableLiveData()
-    val productDetail: LiveData<Products> = _productDetail
-
     private val _productsList: MutableLiveData<List<Products>> = MutableLiveData(emptyList())
     val productsList: LiveData<List<Products>> = _productsList
 
@@ -32,6 +29,11 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     private val _productDeleted: MutableLiveData<Boolean> = MutableLiveData()
     val productDeleted: LiveData<Boolean> = _productDeleted
 
+    var detailProduct: MutableLiveData<Products> = MutableLiveData()
+
+    private val pageSize = 10
+    private var currentPage = 0
+
     fun setFalseProductAdded() {
         _productAdded.value = false
     }
@@ -41,9 +43,8 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     }
 
     fun selectCategory(category: String) {
-        Log.d("itemPDVMD", category)
         _selectedCategory.value = category
-        Log.d("itemPDVMD2", "${selectedCategory.value}")
+
         if (category != "all") {
             getProductsByCategory(category)
         }
@@ -52,7 +53,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
 
     private val retrofit = ServiceBuilder.buildService(ServiceInterface::class.java)
 
-    fun getAllProducts() {
+    private fun getAllProducts() {
         retrofit.getAllProducts().enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 try {
@@ -92,6 +93,23 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e("Failed", "Api Failed" + t.message)
             }
+        })
+    }
+
+    fun getDetailProduct(id: Int) {
+        retrofit.getDetailProduct(id).enqueue(object : Callback<Products> {
+            override fun onResponse(call: Call<Products>, response: Response<Products>) {
+                try {
+                    detailProduct.value = response.body()!!
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onFailure(call: Call<Products>, t: Throwable) {
+                Log.e("Failed", "Api Failed" + t.message)
+            }
+
         })
     }
 
@@ -180,7 +198,6 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
         })
     }
 
-    fun deleteAllProducts() = repository.deleteAll()
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 
     private val _reopenEvent = MutableLiveData<Boolean>()
@@ -190,4 +207,66 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     fun setReopenEvent(value: Boolean) {
         _reopenEvent.value = value
     }
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean>
+        get() = _isLoading
+
+    fun loadMoreProducts() {
+        _isLoading.postValue(true)
+        currentPage++
+
+        Log.d("page", "$currentPage")
+
+        val offset = currentPage * pageSize
+
+        retrofit.getProductsByPaging(pageSize, offset).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                try {
+                    val responseBody = response.body()!!
+                    val products = responseBody.products
+                    val currentList = _productsList.value.orEmpty()
+                    val updatedList = currentList.toMutableList()
+
+                    updatedList.addAll(products)
+
+                    _productsList.postValue(updatedList)
+                    Log.d("page", "${_productsList.value?.size}")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    _isLoading.postValue(false)
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("Failed", "Api Failed" + t.message)
+
+                _isLoading.postValue(false)
+            }
+        })
+    }
+
+    fun getFirstPageProducts() {
+        val offset = currentPage * pageSize
+
+        retrofit.getProductsByPaging(pageSize, offset).enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                try {
+                    val responseBody = response.body()!!
+                    val products = responseBody.products
+
+                    _productsList.postValue(products)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Log.e("Failed", "Api Failed" + t.message)
+            }
+        })
+    }
+
+    fun getProductsByCategoryOffline(category: String) = repository.getProductsByCategory(category)
 }

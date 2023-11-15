@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.adapter.ElectricListAdapter
 import com.example.electroniclist.data.local.entities.asApiResponse
 import com.example.electroniclist.databinding.FragmentListProductsBinding
@@ -42,7 +43,9 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         super.onCreate(savedInstanceState)
 
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
-        productViewModel= sharedViewModel.productViewModel.value ?: throw IllegalArgumentException("ProductViewModel not set.")
+        productViewModel = sharedViewModel.productViewModel.value ?: throw IllegalArgumentException(
+            "ProductViewModel not set."
+        )
     }
 
     @DelicateCoroutinesApi
@@ -54,7 +57,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = productAdapter
 
-        productAdapter.setListener(this)
+        productAdapter.setListener(this, requireActivity())
 
         productViewModel.productsList.observe(viewLifecycleOwner) { products ->
             productAdapter.setProductsList(products)
@@ -65,7 +68,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             productViewModel.selectedCategory.observe(
                 viewLifecycleOwner
             ) { selectedCategory ->
-                productViewModel.getProductsByCategory(selectedCategory)
+                checkAndGetProductsByCategory(selectedCategory)
             }
         }
 
@@ -84,6 +87,28 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
                 refreshData()
             }
         }
+
+        productViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.progressBar.visibility = View.VISIBLE
+            } else {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+
+        binding.recyclerViewProducts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
+
+                if (visibleItemCount + firstVisibleItem >= totalItemCount && (productViewModel.selectedCategory.value == "all" || productViewModel.selectedCategory.value == null)) {
+                    productViewModel.loadMoreProducts()
+                }
+            }
+        })
 
         firstLoad()
     }
@@ -121,13 +146,36 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
 
         if (hasWifi) {
-            productViewModel.getAllProducts()
+            productViewModel.getFirstPageProducts()
         } else {
             CoroutineScope(Dispatchers.IO).launch {
                 val listProductEntity = productViewModel.getAllProductsFromDB()
 
                 withContext(Dispatchers.Main) {
                     productAdapter.setProductsList(listProductEntity.asApiResponse())
+                    productAdapter.notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun checkAndGetProductsByCategory(category: String) {
+        val connectivityManager =
+            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val networkInfo = connectivityManager?.activeNetworkInfo
+        val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
+
+        if (hasWifi) {
+            productViewModel.getProductsByCategory(category)
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                val listProducts =
+                    if (category != "all") productViewModel.getProductsByCategoryOffline(category)
+                    else productViewModel.getAllProductsFromDB()
+
+                withContext(Dispatchers.Main) {
+                    productAdapter.setProductsList(listProducts.asApiResponse())
                     productAdapter.notifyDataSetChanged()
                 }
             }
