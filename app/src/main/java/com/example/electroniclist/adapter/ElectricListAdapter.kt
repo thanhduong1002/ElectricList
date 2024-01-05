@@ -54,71 +54,79 @@ class ElectricListAdapter(private var electricList: List<Products>) :
         return electricList.size
     }
 
-    @Suppress("NAME_SHADOWING")
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ElectricListHolder, position: Int) {
         val item = electricList[position]
 
-        holder.electricItemBinding.textViewName.text = item.title.toString()
-        holder.electricItemBinding.textViewPrice.text = "$${item.price}"
-        Picasso.get().load(item.images?.get(0)).into(holder.electricItemBinding.imageItem)
-
-        holder.electricItemBinding.item.setOnClickListener {
-            fragmentActivity?.let { activity ->
-                val fragmentManager: FragmentManager = activity.supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-
-                val detailProductFragment = DetailProductFragment()
-
-                val args = Bundle()
-                args.putString(DetailProductFragment.ProductId, item.id.toString())
-                args.putString(DetailProductFragment.TitleProduct, item.title)
-                detailProductFragment.arguments = args
-
-                val fragmentContainer1 = activity.findViewById<FrameLayout>(R.id.fragmentContainer1)
-
-                fragmentContainer1.visibility = View.INVISIBLE
-                fragmentTransaction.replace(R.id.fragmentContainer2, detailProductFragment)
-                fragmentTransaction.addToBackStack(null)
-
-                fragmentTransaction.commit()
-            }
-        }
-
-        holder.electricItemBinding.editButton.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, AddProductActivity::class.java)
-
-            intent.putExtra(AddProductActivity.titleEdit, item.title)
-            intent.putExtra(AddProductActivity.ProductId, item.id.toString())
-
-            context.startActivity(intent)
-        }
-
-        holder.electricItemBinding.deleteButton.setOnClickListener {
-            val dialog = AlertDialog.Builder(holder.itemView.context)
-            val textView = TextView(holder.itemView.context)
-
-            with(textView) {
-                text = "Our alert"
-                textSize = 20.0F
-                setTypeface(null, Typeface.BOLD)
-                gravity = Gravity.CENTER
+        holder.electricItemBinding.apply {
+            textViewName.text = item.title.toString()
+            textViewPrice.text = "$${item.price}"
+            textViewId.text = item.id.toString()
+            item.images?.get(0).let {
+                Picasso.get().load(it).into(imageItem)
             }
 
-            dialog.setMessage("Are you sure you want to delete this product?")
-            dialog.setPositiveButton("Yes") { dialog, _ ->
-                listener?.onDeleteProduct(item.id.toString())
-                notifyDataSetChanged()
-                dialog.dismiss()
+            productItem.setOnClickListener {
+                fragmentActivity?.let { activity ->
+                    val fragmentManager: FragmentManager = activity.supportFragmentManager
+                    val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+                    val detailProductFragment = DetailProductFragment()
+                    val args = Bundle().apply {
+                        putString(DetailProductFragment.ProductId, item.id.toString())
+                        putString(DetailProductFragment.TitleProduct, item.title)
+                        putString(DetailProductFragment.DescriptionProduct, item.description)
+                        putString(DetailProductFragment.ProductRating, item.rating.toString())
+                        putString(DetailProductFragment.ProductPrice, item.price.toString())
+                        putString(DetailProductFragment.ProductImage, item.images.toString())
+                    }
+
+                    detailProductFragment.arguments = args
+
+                    val fragmentContainer1 = activity.findViewById<FrameLayout>(R.id.fragmentContainer1)
+
+                    fragmentContainer1.visibility = View.INVISIBLE
+                    fragmentTransaction.apply {
+                        replace(R.id.fragmentContainer2, detailProductFragment)
+                        addToBackStack(null)
+                    }.commit()
+                }
             }
 
-            dialog.setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss()
+            editButton.setOnClickListener {
+                val context = holder.itemView.context
+
+                Intent(context, AddProductActivity::class.java).apply {
+                    putExtra(AddProductActivity.titleEdit, item.title)
+                    putExtra(AddProductActivity.ProductId, item.id.toString())
+                }.run {
+                    context.startActivity(this)
+                }
             }
 
-            dialog.show()
+            deleteButton.setOnClickListener {
+                val textView = TextView(holder.itemView.context)
+
+                with(textView) {
+                    text = "Our alert"
+                    textSize = 20.0F
+                    setTypeface(null, Typeface.BOLD)
+                    gravity = Gravity.CENTER
+                }
+
+                AlertDialog.Builder(holder.itemView.context).apply {
+                    setMessage("Are you sure you want to delete this product?")
+
+                    setPositiveButton("Yes") { dialog, _ ->
+                        listener?.onDeleteProduct(item.id.toString())
+                        notifyDataSetChanged()
+                        dialog.dismiss()
+                    }
+
+                    setNegativeButton("No") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                }.show()
+            }
         }
     }
-
 }

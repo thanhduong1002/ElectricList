@@ -42,11 +42,14 @@ class HomeActivity : AppCompatActivity() {
             commit()
         }
 
-        binding.floatingActionButton.setOnClickListener{
+        binding.floatingActionButton.setOnClickListener {
             val intent = Intent(this, AddProductActivity::class.java)
 
-            intent.putExtra(AddProductActivity.Title, "Add Product")
-            this.startActivity(intent)
+            intent.apply {
+                putExtra(AddProductActivity.Title, "Add Product")
+            }.run {
+                startActivity(this)
+            }
         }
 
         productViewModel.reopenEvent.observe(this) { reopen ->

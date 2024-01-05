@@ -1,6 +1,8 @@
 package com.example.electroniclist
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +20,10 @@ class DetailProductFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
     private var productId: Int = 0
     private var productName: String = ""
+    private var productDescription: String = ""
+    private var productPrice: String = ""
+    private var productRating: String = ""
+    private var productImage: ArrayList<String> ?= null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,6 +44,10 @@ class DetailProductFragment : Fragment() {
         if (arguments != null) {
             productId = arguments.getString(ProductId)?.toInt() ?: 0
             productName = arguments.getString(TitleProduct) ?: "Name Product"
+            productDescription = arguments.getString(DescriptionProduct) ?: "Description Product"
+            productPrice = arguments.getString(ProductPrice) ?: "Price Product"
+            productRating = arguments.getString(ProductRating) ?: "Rating Product"
+            productImage = arguments.getString(ProductImage)?.split(",")?.toMutableList() as ArrayList<String>?
         }
     }
 
@@ -55,11 +65,34 @@ class DetailProductFragment : Fragment() {
             binding.productRating.text = "Rating: ${product.rating} star"
         }
 
-        productViewModel.getDetailProduct(productId)
+        checkAndGetProductByProductId(productId)
     }
 
     companion object {
         const val ProductId = "ProductId"
         const val TitleProduct = "TitleProduct"
+        const val DescriptionProduct = "DescriptionProduct"
+        const val ProductPrice = "ProductPrice"
+        const val ProductRating = "ProductRating"
+        const val ProductImage = "ProductImage"
+    }
+
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
+    private fun checkAndGetProductByProductId(productId: Int) {
+        val connectivityManager =
+            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val networkInfo = connectivityManager?.activeNetworkInfo
+        val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
+
+        if (hasWifi) {
+            productViewModel.getDetailProduct(productId)
+        } else {
+            binding.productId.text = productId.toString()
+            binding.productRating.text = "Rating: $productRating star"
+            binding.productDescription.text = "Description: $productDescription"
+            Picasso.get().load(productImage?.get(0)?.substring(1)).into(binding.imageProduct)
+            binding.productTitle.text = "Name: $productName"
+            binding.productPrice.text = "Price: $productPrice"
+        }
     }
 }
