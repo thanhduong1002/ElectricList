@@ -32,7 +32,6 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     var detailProduct: MutableLiveData<Products> = MutableLiveData()
 
     private val pageSize = 10
-    private var currentPage = 0
 
     fun setFalseProductAdded() {
         _productAdded.value = false
@@ -212,9 +211,8 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
-    fun loadMoreProducts() {
+    fun loadMoreProducts(currentPage: Int) {
         _isLoading.postValue(true)
-        currentPage++
 
         Log.d("page", "$currentPage")
 
@@ -226,9 +224,11 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
                     val responseBody = response.body()!!
                     val products = responseBody.products
                     val currentList = _productsList.value.orEmpty()
-                    val updatedList = currentList.toMutableList()
+                    var updatedList = currentList.toMutableList()
 
                     updatedList.addAll(products)
+                    //update list thì gặp tình trạng bị lặp id làm list đủ số lượng nhưng thiếu vài đoạn id từ 50 - 60, 90 - 100 -> cần lọc theo id rồi mới trả về cho productList
+                    updatedList = updatedList.distinctBy {it.id}.toMutableList()
 
                     _productsList.postValue(updatedList)
                     Log.d("page", "${_productsList.value?.size}")
@@ -248,7 +248,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
     }
 
     fun getFirstPageProducts() {
-        val offset = currentPage * pageSize
+        val offset = 0 * pageSize
 
         retrofit.getProductsByPaging(pageSize, offset).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {

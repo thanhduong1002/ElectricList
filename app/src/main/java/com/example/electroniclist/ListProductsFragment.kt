@@ -65,10 +65,12 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         }
 
         GlobalScope.launch(Dispatchers.Main) {
-            productViewModel.selectedCategory.observe(
-                viewLifecycleOwner
-            ) { selectedCategory ->
-                checkAndGetProductsByCategory(selectedCategory)
+            viewLifecycleOwnerLiveData.value?.let {
+                productViewModel.selectedCategory.observe(
+                    it
+                ) { selectedCategory ->
+                    checkAndGetProductsByCategory(selectedCategory)
+                }
             }
         }
 
@@ -104,8 +106,15 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
 
-                if (visibleItemCount + firstVisibleItem >= totalItemCount && (productViewModel.selectedCategory.value == "all" || productViewModel.selectedCategory.value == null)) {
-                    productViewModel.loadMoreProducts()
+                if (visibleItemCount + firstVisibleItem >= totalItemCount
+                    && (productViewModel.selectedCategory.value == "all"
+                            || productViewModel.selectedCategory.value == null)
+                ) {
+                    productViewModel.loadMoreProducts(
+                        (productViewModel.productsList.value?.size?.div(
+                            10
+                        ) ?: 1)
+                    )
                 }
             }
         })
