@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 class ListProductsFragment : Fragment(), ProductAdapterListener {
     private lateinit var productAdapter: ElectricListAdapter
     private lateinit var productViewModel: ProductViewModel
-    private var isDataLoaded = false
     private lateinit var binding: FragmentListProductsBinding
     private lateinit var sharedViewModel: SharedViewModel
 
@@ -69,7 +68,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
                 productViewModel.selectedCategory.observe(
                     it
                 ) { selectedCategory ->
-                    checkAndGetProductsByCategory(selectedCategory)
+                    checkAndCallData(selectedCategory)
                 }
             }
         }
@@ -84,17 +83,18 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             }
         }
 
-        productViewModel.reopenEvent.observe(viewLifecycleOwner) { reopen ->
+        sharedViewModel.reOpenEvent.observe(viewLifecycleOwner) { reopen ->
             if (reopen) {
                 refreshData()
             }
         }
 
         productViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            Log.d("isLoading", "isLoading: $isLoading")
             if (isLoading) {
                 binding.progressBar.visibility = View.VISIBLE
             } else {
-                binding.progressBar.visibility = View.GONE
+                binding.progressBar.visibility = View.INVISIBLE
             }
         }
 
@@ -119,64 +119,28 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
             }
         })
 
-        firstLoad()
+        checkAndCallData("first")
     }
 
     override fun onDeleteProduct(productId: String) {
-//        repository = ProductRepository(productDao)
-//        productViewModel = ProductViewModel(repository)
-
-//        val productViewModel = ViewModelProvider(requireActivity()).get(ProductViewModel::class.java)
-//        repository = ProductRepository(productDao, serviceInterface)
-//        val productViewModel = ViewModelProvider(this, ProductViewModelFactory(repository)).get(ProductViewModel::class.java)
-
-//        productViewModel.deleteProduct(productId)
-    }
-
-    private fun firstLoad() {
-        Log.d("firstLoad", "firstLoad: ")
-        if (!isDataLoaded) {
-            checkAndLoadData()
-
-            isDataLoaded = true
-        }
+        productViewModel.deleteProduct(productId)
     }
 
     private fun refreshData() {
         Log.d("refreshData", "refreshData: ")
-        checkAndLoadData()
+        checkAndCallData("first")
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun checkAndLoadData() {
+    private fun checkAndCallData(category: String) {
         val connectivityManager =
             context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
         val networkInfo = connectivityManager?.activeNetworkInfo
         val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
 
         if (hasWifi) {
-            productViewModel.getFirstPageProducts()
-        } else {
-            CoroutineScope(Dispatchers.IO).launch {
-                val listProductEntity = productViewModel.getAllProductsFromDB()
-
-                withContext(Dispatchers.Main) {
-                    productAdapter.setProductsList(listProductEntity.asApiResponse())
-                    productAdapter.notifyDataSetChanged()
-                }
-            }
-        }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun checkAndGetProductsByCategory(category: String) {
-        val connectivityManager =
-            context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        val networkInfo = connectivityManager?.activeNetworkInfo
-        val hasWifi = networkInfo?.type == ConnectivityManager.TYPE_WIFI
-
-        if (hasWifi) {
-            productViewModel.getProductsByCategory(category)
+            if (category != "first") productViewModel.getProductsByCategory(category)
+            else productViewModel.getFirstPageProducts()
         } else {
             CoroutineScope(Dispatchers.IO).launch {
                 val listProducts =

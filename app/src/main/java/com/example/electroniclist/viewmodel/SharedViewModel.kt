@@ -5,4 +5,6 @@ import androidx.lifecycle.ViewModel
 
 class SharedViewModel : ViewModel() {
     val productViewModel = MutableLiveData<ProductViewModel>()
+
+    val reOpenEvent = MutableLiveData<Boolean>()
 }

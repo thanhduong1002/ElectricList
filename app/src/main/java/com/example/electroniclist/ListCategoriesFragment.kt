@@ -17,6 +17,7 @@ import com.example.electroniclist.data.local.dao.CategoryDao
 import com.example.electroniclist.data.local.entities.asCategoryList
 import com.example.electroniclist.data.repository.CategoryRepository
 import com.example.electroniclist.databinding.FragmentListCategoriesBinding
+import com.example.electroniclist.interfaces.IChooseCategory
 import com.example.electroniclist.viewmodel.CategoryViewModel
 import com.example.electroniclist.viewmodel.ProductViewModel
 import com.example.electroniclist.viewmodel.SharedViewModel
@@ -26,13 +27,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ListCategoriesFragment : Fragment() {
+class ListCategoriesFragment : Fragment(), IChooseCategory {
     private lateinit var categoryAdapter: CategoryListAdapter
     private lateinit var productViewModel: ProductViewModel
     private lateinit var categoryViewModel: CategoryViewModel
     private lateinit var categoryDao: CategoryDao
     private lateinit var categoryRepository: CategoryRepository
-    private var isDataLoaded = false
     private lateinit var binding: FragmentListCategoriesBinding
     private lateinit var sharedViewModel: SharedViewModel
 
@@ -51,6 +51,7 @@ class ListCategoriesFragment : Fragment() {
         categoryDao = appDatabase.categoryDao()
         categoryRepository = CategoryRepository(categoryDao, appDatabase)
         categoryViewModel = CategoryViewModel(categoryRepository)
+
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
         productViewModel = sharedViewModel.productViewModel.value ?: throw IllegalArgumentException("ProductViewModel not set.")
     }
@@ -58,30 +59,25 @@ class ListCategoriesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        categoryAdapter = CategoryListAdapter(emptyList(), productViewModel)
-        binding.recyclerViewCategories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerViewCategories.adapter = categoryAdapter
-
-        categoryViewModel.categoryList.observe(viewLifecycleOwner) { categories ->
-            categoryAdapter.categoryList = categories
-            categoryAdapter.notifyDataSetChanged()
+        categoryAdapter = CategoryListAdapter(emptyList(), this)
+        binding.recyclerViewCategories.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = categoryAdapter
         }
 
-        productViewModel.reopenEvent.observe(viewLifecycleOwner) { reopen ->
+        categoryViewModel.categoryList.observe(viewLifecycleOwner) { categories ->
+            categoryAdapter.apply {
+                categoryList = categories
+                notifyDataSetChanged()
+            }
+        }
+
+        sharedViewModel.reOpenEvent.observe(viewLifecycleOwner) { reopen ->
             if (reopen) {
                 refreshData()
             }
         }
-        firstLoad()
-    }
-
-    private fun firstLoad() {
-        if (!isDataLoaded) {
-            Log.d("firstLoadCate", "Load lan 1")
-            checkAndLoadData()
-
-            isDataLoaded = true
-        }
+        checkAndLoadData()
     }
 
     private fun refreshData() {
@@ -108,5 +104,9 @@ class ListCategoriesFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onClickCategory(selectCategory: String) {
+        productViewModel.selectCategory(selectCategory)
     }
 }

@@ -44,9 +44,6 @@ class AddProductActivity : AppCompatActivity(), ProductCallback {
 
         repository = ProductRepository(productDao, appDatabase)
         productViewModel = ProductViewModel(repository)
-//        productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
-//        repository = ProductRepository(productDao, serviceInterface)
-//        productViewModel = ViewModelProvider(this, ProductViewModelFactory(repository)).get(ProductViewModel::class.java)
 
         val adapter = ArrayAdapter.createFromResource(this, R.array.category_list, android.R.layout.simple_spinner_item)
 

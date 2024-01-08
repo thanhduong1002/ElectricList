@@ -43,7 +43,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
-
+        Log.d("category", "category: $category")
         if (category != "all") {
             getProductsByCategory(category)
         }
@@ -99,7 +99,7 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
         retrofit.getDetailProduct(id).enqueue(object : Callback<Products> {
             override fun onResponse(call: Call<Products>, response: Response<Products>) {
                 try {
-                    detailProduct.value = response.body()!!
+                    detailProduct.postValue(response.body())
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 }
@@ -199,22 +199,12 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
 
     fun getAllProductsFromDB(): List<ProductEntity> = repository.getAllProducts()
 
-    private val _reopenEvent = MutableLiveData<Boolean>()
-    val reopenEvent: LiveData<Boolean>
-        get() = _reopenEvent
-
-    fun setReopenEvent(value: Boolean) {
-        _reopenEvent.value = value
-    }
-
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
     fun loadMoreProducts(currentPage: Int) {
         _isLoading.postValue(true)
-
-        Log.d("page", "$currentPage")
 
         val offset = currentPage * pageSize
 
@@ -231,7 +221,6 @@ class ProductViewModel(val repository: ProductRepository) : ViewModel() {
                     updatedList = updatedList.distinctBy {it.id}.toMutableList()
 
                     _productsList.postValue(updatedList)
-                    Log.d("page", "${_productsList.value?.size}")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
