@@ -11,10 +11,11 @@ import com.example.electroniclist.data.local.dao.ProductDao
 import com.example.electroniclist.data.repository.CategoryRepository
 import com.example.electroniclist.data.repository.ProductRepository
 import com.example.electroniclist.databinding.ActivityListCategoriesBinding
+import com.example.electroniclist.interfaces.IChooseCategory
 import com.example.electroniclist.viewmodel.CategoryViewModel
 import com.example.electroniclist.viewmodel.ProductViewModel
 
-class ListCategoriesActivity : AppCompatActivity() {
+class ListCategoriesActivity : AppCompatActivity(), IChooseCategory {
     private lateinit var categoryViewModel: CategoryViewModel
     private lateinit var productViewModel: ProductViewModel
     private lateinit var categoryRepository: CategoryRepository
@@ -40,7 +41,7 @@ class ListCategoriesActivity : AppCompatActivity() {
         productViewModel = ProductViewModel(repository)
         categoryViewModel = CategoryViewModel(categoryRepository)
 
-        val adapter = CategoryListAdapter(emptyList(), productViewModel)
+        val adapter = CategoryListAdapter(emptyList(), this)
 
         binding.recyclerViewCategories.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -52,5 +53,9 @@ class ListCategoriesActivity : AppCompatActivity() {
         }
 
         categoryViewModel.fetchCategories()
+    }
+
+    override fun onClickCategory(selectCategory: String) {
+        productViewModel.selectCategory(selectCategory)
     }
 }

@@ -7,9 +7,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
@@ -82,10 +80,9 @@ class ElectricListAdapter(private var electricList: List<Products>) :
 
                     detailProductFragment.arguments = args
 
-                    val fragmentContainer1 = activity.findViewById<FrameLayout>(R.id.fragmentContainer1)
-
-                    fragmentContainer1.visibility = View.INVISIBLE
                     fragmentTransaction.apply {
+                        fragmentManager.findFragmentById(R.id.fragmentContainer1)
+                            ?.let { it1 -> remove(it1) }
                         replace(R.id.fragmentContainer2, detailProductFragment)
                         addToBackStack(null)
                     }.commit()

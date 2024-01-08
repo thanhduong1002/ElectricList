@@ -28,6 +28,8 @@ class HomeActivity : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setActionBarTitle(getString(R.string.app_name))
+
         val appDatabase = AppDatabase.getDatabase(this)
 
         productDao = appDatabase.productDao()
@@ -43,17 +45,11 @@ class HomeActivity : AppCompatActivity() {
         }
 
         binding.floatingActionButton.setOnClickListener {
-            val intent = Intent(this, AddProductActivity::class.java)
-
-            intent.apply {
+            Intent(this, AddProductActivity::class.java).apply {
                 putExtra(AddProductActivity.Title, "Add Product")
             }.run {
                 startActivity(this)
             }
-        }
-
-        productViewModel.reopenEvent.observe(this) { reopen ->
-            Log.d("reopen", "onViewCreated: $reopen")
         }
     }
 
@@ -71,7 +67,7 @@ class HomeActivity : AppCompatActivity() {
             val elapsedTime = System.currentTimeMillis() - appPausedTime
             if (elapsedTime > (2 * 60 * 1000)) {
                 Log.d("reopen", "da qua 2 minutes")
-                productViewModel.setReopenEvent(true)
+                sharedViewModel.reOpenEvent.value = true
             }
         }
         appInBackground = false

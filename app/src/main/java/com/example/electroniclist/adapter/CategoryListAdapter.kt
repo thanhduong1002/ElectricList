@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.databinding.CategoryItemBinding
-import com.example.electroniclist.viewmodel.ProductViewModel
+import com.example.electroniclist.interfaces.IChooseCategory
 
 class CategoryListAdapter(
     var categoryList: List<String>,
-    private val productViewModel: ProductViewModel
+    private val listener: IChooseCategory
 ) : RecyclerView.Adapter<CategoryListAdapter.CategoryListViewHolder>() {
     private var selectedItemPosition = -1
 
@@ -37,23 +37,25 @@ class CategoryListAdapter(
     ) {
         val item = categoryList[position]
 
-        holder.categoryItemBinding.categoryButton.text = item
-        holder.categoryItemBinding.categoryButton.setOnClickListener {
-            selectedItemPosition = if (position == selectedItemPosition) {
-                productViewModel.selectCategory("all")
-                -1
-            } else {
-                productViewModel.selectCategory(item)
-                position
+        holder.categoryItemBinding.categoryButton.apply {
+            text = item
+            setOnClickListener {
+                selectedItemPosition = if (position == selectedItemPosition) {
+                    listener.onClickCategory("all")
+                    -1
+                } else {
+                    listener.onClickCategory(item)
+                    position
+                }
+
+                notifyDataSetChanged()
             }
 
-            notifyDataSetChanged()
-        }
-
-        if (position == selectedItemPosition) {
-            holder.categoryItemBinding.categoryButton.setBackgroundColor(Color.BLUE)
-        } else {
-            holder.categoryItemBinding.categoryButton.setBackgroundColor(Color.parseColor("#70A7D8"))
+            if (position == selectedItemPosition) {
+                setBackgroundColor(Color.BLUE)
+            } else {
+                setBackgroundColor(Color.parseColor("#70A7D8"))
+            }
         }
     }
 
