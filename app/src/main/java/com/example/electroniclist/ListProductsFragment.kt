@@ -144,7 +144,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         } else {
             CoroutineScope(Dispatchers.IO).launch {
                 val listProducts =
-                    if (category != "all") productViewModel.getProductsByCategoryOffline(category)
+                    if (category != "all" && category != "first") productViewModel.getProductsByCategoryOffline(category)
                     else productViewModel.getAllProductsFromDB()
 
                 withContext(Dispatchers.Main) {
