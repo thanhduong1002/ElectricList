@@ -90,7 +90,6 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         }
 
         productViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            Log.d("isLoading", "isLoading: $isLoading")
             if (isLoading) {
                 binding.progressBar.visibility = View.VISIBLE
             } else {

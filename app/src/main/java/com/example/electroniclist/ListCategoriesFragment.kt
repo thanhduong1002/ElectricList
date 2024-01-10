@@ -77,6 +77,7 @@ class ListCategoriesFragment : Fragment(), IChooseCategory {
                 refreshData()
             }
         }
+
         checkAndLoadData()
     }
 
