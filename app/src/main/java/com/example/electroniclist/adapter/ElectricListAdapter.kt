@@ -83,7 +83,7 @@ class ElectricListAdapter(private var electricList: List<Products>) :
                     fragmentTransaction.apply {
                         fragmentManager.findFragmentById(R.id.fragmentContainer1)
                             ?.let { it1 -> remove(it1) }
-                        replace(R.id.fragmentContainer2, detailProductFragment)
+                        add(R.id.fragmentContainer2, detailProductFragment)
                         addToBackStack(null)
                     }.commit()
                 }

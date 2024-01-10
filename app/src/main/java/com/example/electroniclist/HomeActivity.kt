@@ -79,4 +79,14 @@ class HomeActivity : AppCompatActivity() {
     fun setActionBarTitle(title: String?) {
         supportActionBar?.title = title
     }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            onBackPressedDispatcher.onBackPressed()
+        } else {
+            supportFragmentManager.popBackStack()
+            setActionBarTitle(getString(R.string.app_name))
+        }
+    }
 }
