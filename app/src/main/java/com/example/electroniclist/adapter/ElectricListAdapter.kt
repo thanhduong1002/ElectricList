@@ -9,14 +9,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.RecyclerView
 import com.example.electroniclist.AddProductActivity
 import com.example.electroniclist.DetailProductFragment
 import com.example.electroniclist.ProductAdapterListener
-import com.example.electroniclist.R
 import com.example.electroniclist.data.Products
 import com.example.electroniclist.databinding.ElectricItemBinding
 import com.squareup.picasso.Picasso
@@ -25,10 +21,8 @@ class ElectricListAdapter(private var electricList: List<Products>) :
     RecyclerView.Adapter<ElectricListAdapter.ElectricListHolder>() {
 
     private var listener: ProductAdapterListener? = null
-    private var fragmentActivity: FragmentActivity? = null
-    fun setListener(listener: ProductAdapterListener, fragmentActivity: FragmentActivity) {
+    fun setListener(listener: ProductAdapterListener) {
         this.listener = listener
-        this.fragmentActivity = fragmentActivity
     }
 
     fun setProductsList(electricList: List<Products>) {
@@ -65,28 +59,15 @@ class ElectricListAdapter(private var electricList: List<Products>) :
             }
 
             productItem.setOnClickListener {
-                fragmentActivity?.let { activity ->
-                    val fragmentManager: FragmentManager = activity.supportFragmentManager
-                    val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                    val detailProductFragment = DetailProductFragment()
-                    val args = Bundle().apply {
-                        putString(DetailProductFragment.ProductId, item.id.toString())
-                        putString(DetailProductFragment.TitleProduct, item.title)
-                        putString(DetailProductFragment.DescriptionProduct, item.description)
-                        putString(DetailProductFragment.ProductRating, item.rating.toString())
-                        putString(DetailProductFragment.ProductPrice, item.price.toString())
-                        putString(DetailProductFragment.ProductImage, item.images.toString())
-                    }
-
-                    detailProductFragment.arguments = args
-
-                    fragmentTransaction.apply {
-                        fragmentManager.findFragmentById(R.id.fragmentContainer1)
-                            ?.let { it1 -> remove(it1) }
-                        add(R.id.fragmentContainer2, detailProductFragment)
-                        addToBackStack(null)
-                    }.commit()
+                val args = Bundle().apply {
+                    putString(DetailProductFragment.ProductId, item.id.toString())
+                    putString(DetailProductFragment.TitleProduct, item.title)
+                    putString(DetailProductFragment.DescriptionProduct, item.description)
+                    putString(DetailProductFragment.ProductRating, item.rating.toString())
+                    putString(DetailProductFragment.ProductPrice, item.price.toString())
+                    putString(DetailProductFragment.ProductImage, item.images.toString())
                 }
+                item.id?.let { it1 -> listener?.onClickDetailProduct(it1, args) }
             }
 
             editButton.setOnClickListener {
