@@ -56,7 +56,7 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
         binding.recyclerViewProducts.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewProducts.adapter = productAdapter
 
-        productAdapter.setListener(this, requireActivity())
+        productAdapter.setListener(this)
 
         productViewModel.productsList.observe(viewLifecycleOwner) { products ->
             productAdapter.setProductsList(products)
@@ -123,6 +123,23 @@ class ListProductsFragment : Fragment(), ProductAdapterListener {
 
     override fun onDeleteProduct(productId: String) {
         productViewModel.deleteProduct(productId)
+    }
+
+    @SuppressLint("CommitTransaction")
+    override fun onClickDetailProduct(productId: Int, bundle: Bundle) {
+        val fragmentListCategory = requireActivity().supportFragmentManager.findFragmentById(R.id.fragmentContainer1)
+
+        val detailProductFragment = DetailProductFragment()
+        detailProductFragment.arguments = bundle
+
+        requireActivity().supportFragmentManager.beginTransaction().apply {
+            if (fragmentListCategory != null) {
+                remove(fragmentListCategory)
+            }
+            add(R.id.fragmentContainer2, detailProductFragment)
+            addToBackStack(null)
+            commit()
+        }
     }
 
     private fun refreshData() {
